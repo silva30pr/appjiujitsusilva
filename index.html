@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Jiu-Jitsu - Controle de Treinos</title> <!-- Título da aba também atualizado -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- Reset Básico e Configuração Geral --- */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #2c3e50, #4a0e4e);
+            background-attachment: fixed;
+            color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        /* --- Container Principal --- */
+        .container {
+            background-color: rgba(15, 23, 42, 0.4);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            max-width: 95%;
+            width: 650px;
+            margin: 20px auto;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- Cabeçalho --- */
+        .app-header h1 {
+            text-align: center; color: #fff; margin-bottom: 40px;
+            font-size: 2.8em; font-weight: 700;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            letter-spacing: 1px;
+        }
+
+        /* --- Formulário --- */
+        .training-form { display: flex; flex-direction: column; gap: 25px; }
+        .photo-upload-container { display: flex; justify-content: center; }
+
+        /* --- Área da Foto --- */
+        .photo-square {
+            width: 110px; height: 147px; border: 2px dashed rgba(255, 255, 255, 0.4);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; cursor: pointer; color: #bbb; font-size: 0.85em;
+            border-radius: 10px; background-size: cover; background-position: center;
+            transition: all 0.3s ease; overflow: hidden; gap: 8px;
+        }
+        .photo-square:hover { border-color: #fff; border-style: solid; color: #fff; background-color: rgba(255, 255, 255, 0.05); }
+        .photo-square svg { width: 30px; height: 30px; fill: currentColor; transition: transform 0.3s ease; }
+        .photo-square:hover svg { transform: scale(1.1); }
+
+        /* --- Grupos de Formulário --- */
+        .form-group { position: relative; }
+        .form-group > label:not(.column-label) {
+             display: block; margin-bottom: 10px; font-weight: 600; color: #eee;
+             font-size: 1.0em; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group select {
+            width: 100%; padding: 12px 15px; border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3); border-radius: 6px 6px 0 0;
+            font-size: 1em; background-color: rgba(255, 255, 255, 0.08); color: #fff;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        .form-group select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23CCCCCC%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat; background-position: right 15px center;
+            background-size: 10px auto; padding-right: 40px;
+        }
+        .form-group input::placeholder { color: #aaa; opacity: 1; font-weight: 300; }
+        .form-group input:-ms-input-placeholder { color: #aaa; font-weight: 300; }
+        .form-group input::-ms-input-placeholder { color: #aaa; font-weight: 300; }
+        .form-group input[type="text"]:focus,
+        .form-group input[type="date"]:focus,
+        .form-group select:focus {
+            outline: none; border-color: #8e44ad; background-color: rgba(255, 255, 255, 0.12);
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
+
+        /* --- ESTILOS PARA FAIXA/GRAU --- */
+        .belt-options-container {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 20px; margin-bottom: 15px; flex-wrap: wrap;
+        }
+        .belt-column {
+            display: flex; flex-direction: column; gap: 10px;
+            flex-basis: 0; flex-grow: 1; min-width: 150px;
+        }
+        .column-label {
+            font-weight: 600; color: #eee; font-size: 1.0em;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0;
+        }
+        .belt-color-selector, .belt-degree-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0; }
+        .belt-degree-selector .degree-label { display: none; }
+        .belt-color-square {
+            display: inline-block; width: 22px; height: 22px; border-radius: 4px;
+            cursor: pointer; border: 2px solid transparent;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .belt-color-square[data-color="Branca"] { border: 1px solid #ccc; }
+        .belt-color-square[data-color="Preta"] { border: 1px solid #444; }
+        .belt-color-square:hover { transform: scale(1.15); border-color: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
+        .belt-color-square.selected { border-color: #f0f0f0; transform: scale(1.1); box-shadow: 0 0 8px rgba(255, 255, 255, 0.5); }
+        .belt-degree-square {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1); color: #eee;
+            font-size: 0.9em; font-weight: 600; cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.2s ease;
+            text-align: center;
+        }
+        .belt-degree-square:hover { background-color: rgba(255, 255, 255, 0.2); border-color: #fff; transform: scale(1.1); }
+        .belt-degree-square.selected { background-color: #8e44ad; color: #fff; border-color: #fff; box-shadow: 0 0 6px rgba(142, 68, 173, 0.7); }
+        .belt-degree-square.clear-degree { font-weight: bold; font-size: 1.1em; color: #ffaaaa; background-color: rgba(255, 100, 100, 0.1); border-color: rgba(255, 100, 100, 0.3); }
+        .belt-degree-square.clear-degree:hover { background-color: rgba(255, 100, 100, 0.3); color: #ffdddd; border-color: #ffaaaa; }
+        #studentBelt { margin-top: 0; }
+        /* --- FIM DOS ESTILOS PARA FAIXA/GRAU --- */
+
+        /* --- Botão Finalizar --- */
+        .finish-button {
+            background: linear-gradient(to right, #5cb85c, #4cae4c); color: white;
+            padding: 14px 25px; border: none; border-radius: 8px; cursor: pointer;
+            font-size: 1.1em; font-weight: 600; letter-spacing: 0.5px;
+            transition: all 0.3s ease; margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); text-transform: uppercase;
+        }
+        .finish-button:hover { background: linear-gradient(to right, #4cae4c, #3b8f3b); transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); }
+        .finish-button:active { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); }
+
+        /* --- Seção do Relatório --- */
+        .report-section {
+            margin-top: 50px; padding: 30px; border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; background-color: rgba(15, 23, 42, 0.3);
+        }
+        .report-section h2 {
+            color: #fff; text-align: center; margin-bottom: 25px; font-size: 2.2em;
+            font-weight: 600; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+        /* --- Área Rolável do Relatório --- */
+        .monthly-report {
+            padding: 10px; border-radius: 8px; background-color: rgba(0, 0, 0, 0.2);
+            max-height: 400px; overflow-y: auto; scrollbar-width: thin;
+            scrollbar-color: rgba(142, 68, 173, 0.6) rgba(0,0,0,0.3);
+        }
+        .monthly-report::-webkit-scrollbar{width:8px}
+        .monthly-report::-webkit-scrollbar-track{background:rgba(0,0,0,.2);border-radius:4px}
+        .monthly-report::-webkit-scrollbar-thumb{background-color:rgba(142, 68, 173, 0.7);border-radius:4px;}
+        .monthly-report::-webkit-scrollbar-thumb:hover{background-color:rgba(142, 68, 173, 0.9);}
+
+        .monthly-report h3 { display: none; }
+        .monthly-report ul { list-style-type: none; }
+        /* --- Item da Lista do Relatório --- */
+        .monthly-report ul li {
+            padding: 15px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex; align-items: center; justify-content: space-between;
+            color: #e0e0e0; gap: 15px; transition: background-color 0.3s ease;
+        }
+        .monthly-report ul li:last-child { border-bottom: none; }
+        .monthly-report ul li:hover { background-color: rgba(255, 255, 255, 0.05); }
+        .report-item-content { display: flex; align-items: center; flex-grow: 1; gap: 15px; }
+        /* --- Mensagem "Nenhum treino" --- */
+        .monthly-report p { color: #bbb; font-size: 1em; text-align: center; margin-top: 20px; padding: 20px; font-style: italic; }
+        /* --- Foto e Placeholder no Relatório --- */
+        .report-photo { width: 55px; height: 73px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; }
+        .no-photo-placeholder { display: inline-flex; align-items: center; justify-content: center; width: 55px; height: 73px; background: rgba(255,255,255,0.1); border-radius: 6px; text-align: center; font-size: 10px; color: #aaa; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1); }
+
+        /* --- Botão de Excluir Registro --- */
+        .delete-record-button {
+            background-color: transparent; color: rgba(255, 100, 100, 0.7);
+            border: 1px solid rgba(255, 100, 100, 0.5); border-radius: 50%;
+            width: 30px; height: 30px; padding: 0; font-size: 14px;
+            line-height: 28px; text-align: center; cursor: pointer;
+            transition: all 0.3s ease; flex-shrink: 0; display: inline-flex;
+            align-items: center; justify-content: center;
+        }
+        .delete-record-button svg { width: 14px; height: 14px; fill: currentColor; }
+        .delete-record-button:hover { background-color: rgba(217, 83, 79, 0.9); color: white; border-color: transparent; transform: scale(1.1) rotate(15deg); }
+        .delete-record-button:active { transform: scale(1); }
+
+        /* --- Rodapé --- */
+        .app-footer { text-align: center; margin-top: 40px; color: #aaa; font-size: 0.9em; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); opacity: 0.7; }
+
+        /* --- Responsividade --- */
+        @media (max-width: 768px) {
+            body { padding: 20px 10px; }
+            .container { width: 95%; padding: 25px; }
+            .app-header h1 { font-size: 2.2em; margin-bottom: 30px; }
+            .training-form { gap: 20px; }
+            .finish-button { font-size: 1em; padding: 12px 20px; }
+            .report-section { margin-top: 40px; padding: 20px; }
+            .report-section h2 { font-size: 1.9em; margin-bottom: 20px; }
+            .monthly-report { max-height: 350px; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 15px 5px; }
+            .container { padding: 20px; border-radius: 12px; }
+            .app-header h1 { font-size: 1.9em; }
+            .photo-square { width: 90px; height: 120px; }
+            .form-group > label:not(.column-label) { font-size: 0.9em; margin-bottom: 8px; }
+            .column-label { font-size: 0.9em; }
+            .form-group input[type=text],.form-group input[type=date],.form-group select{font-size:.9em;padding:10px 12px}
+            .belt-color-square { width: 20px; height: 20px; }
+            .belt-degree-square { width: 24px; height: 24px; font-size: 0.8em; }
+            .belt-options-container { gap: 15px; }
+            .belt-column { min-width: 120px; }
+            .belt-degree-selector { gap: 5px; }
+            .finish-button { font-size: 0.95em; padding: 10px 15px; }
+            .report-section { padding: 15px; }
+            .report-section h2 { font-size: 1.7em; }
+            .report-photo, .no-photo-placeholder { width: 45px; height: 60px; }
+            .delete-record-button { width: 26px; height: 26px; line-height: 24px; }
+            .delete-record-button svg { width: 12px; height: 12px; }
+            .monthly-report ul li { font-size: 0.85em; gap: 8px; padding: 12px 8px;}
+            .report-item-content { gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- CABEÇALHO ATUALIZADO -->
+        <header class="app-header">
+            <h1>Academia Jiu-Jitsu</h1>
+        </header>
+        <main class="app-main">
+            <form id="trainingForm" class="training-form" onsubmit="return false;">
+
+                <!-- Upload de Foto -->
+                <div class="photo-upload-container">
+                    <label class="photo-square" for="photoUpload" id="photoLabel">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 9a3.75 3.75 0 1 0 0 7.5A3.75 3.75 0 0 0 12 9Z" />
+                          <path fill-rule="evenodd" d="M9.344 3.071a49.52 49.52 0 0 1 5.312 0c.967.052 1.83.585 2.342 1.374a3.026 3.026 0 0 1 .868 2.845.83.83 0 0 1-.644.643 49.37 49.37 0 0 1-5.194 0 .83.83 0 0 1-.644-.643 3.025 3.025 0 0 1 .868-2.845c.513-.789 1.375-1.322 2.342-1.374ZM10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm4.5 0a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0ZM11.25 1.5a.75.75 0 0 1 .75.75v.75h-.75V2.25a.75.75 0 0 1-.75-.75Zm-1.5 0a.75.75 0 0 0-.75.75v.75h.75V2.25a.75.75 0 0 0 .75-.75Zm6 0a.75.75 0 0 1 .75.75v.75h-.75V2.25a.75.75 0 0 1-.75-.75Zm-1.5 0a.75.75 0 0 0-.75.75v.75h.75V2.25a.75.75 0 0 0 .75-.75ZM4.872 8.21a.75.75 0 0 0-.722.523l-.94 3.131a.75.75 0 0 0 .722.975h.316a.75.75 0 0 1 .75.75v3.131a.75.75 0 0 0 .75.75h6a.75.75 0 0 0 .75-.75v-3.131a.75.75 0 0 1 .75-.75h.316a.75.75 0 0 0 .722-.975l-.94-3.131a.75.75 0 0 0-.722-.523H4.872ZM6 18.75a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Adicionar Foto</span>
+                    </label>
+                    <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+                </div>
+
+                <!-- Nome do Aluno -->
+                <div class="form-group">
+                    <label for="studentName">Nome do Aluno:</label>
+                    <input type="text" id="studentName" placeholder="Digite o nome completo">
+                </div>
+
+                <!-- Faixa/Grau -->
+                <div class="form-group">
+                    <div class="belt-options-container">
+                        <div class="belt-column belt-color-column">
+                            <label class="column-label">Faixa:</label>
+                            <div class="belt-color-selector" id="beltColorSelector">
+                                <span class="belt-color-square" data-color="Branca" style="background-color: #ffffff;" title="Faixa Branca"></span>
+                                <span class="belt-color-square" data-color="Azul" style="background-color: #007bff;" title="Faixa Azul"></span>
+                                <span class="belt-color-square" data-color="Roxa" style="background-color: #6f42c1;" title="Faixa Roxa"></span>
+                                <span class="belt-color-square" data-color="Marrom" style="background-color: #8B4513;" title="Faixa Marrom"></span>
+                                <span class="belt-color-square" data-color="Preta" style="background-color: #000000;" title="Faixa Preta"></span>
+                            </div>
+                        </div>
+                        <div class="belt-column belt-degree-column">
+                            <label class="column-label">Grau:</label>
+                            <div class="belt-degree-selector" id="beltDegreeSelector">
+                                <span class="belt-degree-square" data-degree="I" title="1º Grau">I</span>
+                                <span class="belt-degree-square" data-degree="II" title="2º Grau">II</span>
+                                <span class="belt-degree-square" data-degree="III" title="3º Grau">III</span>
+                                <span class="belt-degree-square" data-degree="IV" title="4º Grau">IV</span>
+                                <span class="belt-degree-square clear-degree" data-degree="" title="Remover grau">Ø</span>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" id="studentBelt" placeholder="Selecione cor e/ou grau" readonly>
+                </div>
+
+                <!-- Data do Treino -->
+                <div class="form-group">
+                    <label for="trainingDate">Data do Treino:</label>
+                    <input type="date" id="trainingDate">
+                </div>
+
+                <!-- Horário da Aula -->
+                <div class="form-group">
+                    <label for="classTime">Horário da Aula:</label>
+                    <select id="classTime">
+                        <option value="" disabled selected>Selecione o horário</option>
+                        <option value="09:00-10:00">09:00 às 10:00hs</option>
+                        <option value="18:00-19:00">18:00 às 19:00hs</option>
+                    </select>
+                </div>
+
+                <!-- Botão Finalizar -->
+                <button type="button" id="finishTraining" class="finish-button">Finalizar Treino</button>
+            </form>
+
+            <!-- Seção do Relatório -->
+            <section class="report-section">
+                <h2>Relatório Mensal</h2>
+                <div id="monthlyReport" class="monthly-report">
+                    <!-- Conteúdo gerado pelo JavaScript -->
+                </div>
+            </section>
+        </main>
+
+        <!-- RODAPÉ ATUALIZADO -->
+        <footer class="app-footer">
+            <p>© 2025 Academia Jiu-Jitsu. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Referências aos Elementos ---
+            const photoUploadInput = document.getElementById('photoUpload');
+            const photoLabel = document.getElementById('photoLabel');
+            const studentNameInput = document.getElementById('studentName');
+            const studentBeltInput = document.getElementById('studentBelt');
+            const beltColorSelector = document.getElementById('beltColorSelector');
+            const beltDegreeSelector = document.getElementById('beltDegreeSelector');
+            const trainingDateInput = document.getElementById('trainingDate');
+            const classTimeSelect = document.getElementById('classTime');
+            const finishTrainingButton = document.getElementById('finishTraining');
+            const monthlyReportDiv = document.getElementById('monthlyReport');
+
+            // --- Variáveis de Estado ---
+            let currentPhotoDataUrl = null;
+            let selectedBeltColor = '';
+            let selectedBeltDegree = '';
+
+            // --- Lógica de Upload de Foto ---
+            photoUploadInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    if (!file.type.startsWith('image/')){
+                        alert('Por favor, selecione um arquivo de imagem válido.');
+                        photoUploadInput.value = null; return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        photoLabel.style.backgroundImage = `url(${e.target.result})`;
+                        const icon = photoLabel.querySelector('svg');
+                        const text = photoLabel.querySelector('span');
+                        if (icon) icon.style.display = 'none';
+                        if (text) text.style.display = 'none';
+                        photoLabel.style.backgroundSize = 'cover';
+                        photoLabel.style.backgroundPosition = 'center';
+                        currentPhotoDataUrl = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                } else { resetPhotoDisplay(); }
+                photoUploadInput.value = null;
+            });
+
+            function resetPhotoDisplay() {
+                photoLabel.style.backgroundImage = '';
+                const icon = photoLabel.querySelector('svg');
+                const text = photoLabel.querySelector('span');
+                if (icon) icon.style.display = 'block';
+                if (text) text.style.display = 'block';
+                photoLabel.style.backgroundSize = 'auto';
+                currentPhotoDataUrl = null;
+            }
+
+            // --- Lógica de Seleção de Cor da Faixa ---
+            beltColorSelector.addEventListener('click', function(event) {
+                if (event.target.classList.contains('belt-color-square')) {
+                    const selectedSquare = event.target;
+                    selectedBeltColor = selectedSquare.dataset.color;
+                    beltColorSelector.querySelectorAll('.belt-color-square.selected').forEach(sq => sq.classList.remove('selected'));
+                    selectedSquare.classList.add('selected');
+                    updateStudentBeltInput();
+                }
+            });
+
+            // --- Lógica de Seleção de Grau ---
+            beltDegreeSelector.addEventListener('click', function(event) {
+                if (event.target.classList.contains('belt-degree-square')) {
+                    const selectedSquare = event.target;
+                    const degreeValue = selectedSquare.dataset.degree;
+                    if (selectedSquare.classList.contains('clear-degree')) {
+                        selectedBeltDegree = '';
+                        beltDegreeSelector.querySelectorAll('.belt-degree-square.selected').forEach(sq => sq.classList.remove('selected'));
+                    } else {
+                        selectedBeltDegree = degreeValue;
+                        beltDegreeSelector.querySelectorAll('.belt-degree-square.selected').forEach(sq => sq.classList.remove('selected'));
+                        selectedSquare.classList.add('selected');
+                    }
+                    updateStudentBeltInput();
+                }
+            });
+
+            // --- Função para Atualizar o Input de Faixa/Grau ---
+            function updateStudentBeltInput() {
+                let beltString = '';
+                if (selectedBeltColor) {
+                    beltString = `Faixa ${selectedBeltColor}`;
+                }
+                if (selectedBeltDegree) {
+                    beltString += (beltString ? ` ${selectedBeltDegree}` : `${selectedBeltDegree}`);
+                }
+                studentBeltInput.value = beltString;
+                studentBeltInput.placeholder = beltString ? '' : 'Selecione cor e/ou grau';
+            }
+
+            // --- Lógica do Botão "Finalizar Treino" ---
+            finishTrainingButton.addEventListener('click', function() {
+                const studentName = studentNameInput.value.trim();
+                const studentBelt = studentBeltInput.value.trim();
+                const trainingDate = trainingDateInput.value;
+                const classTime = classTimeSelect.value;
+                const photoData = currentPhotoDataUrl;
+
+                if (!studentName || !studentBelt || !trainingDate || !classTime) {
+                    alert('Por favor, preencha todos os campos obrigatórios.'); return;
+                }
+                const trainingData = { name: studentName, belt: studentBelt, date: trainingDate, time: classTime, photo: photoData };
+
+                try {
+                    const key = 'training_' + Date.now();
+                    localStorage.setItem(key, JSON.stringify(trainingData));
+                    generateMonthlyReport(); // Atualiza o relatório
+                    clearForm(); // Limpa o formulário
+                } catch (e) {
+                     if (e.name === 'QuotaExceededError') { alert('Erro: Espaço de armazenamento cheio.'); }
+                     else { alert('Erro inesperado ao salvar.'); }
+                     console.error("Erro localStorage:", e);
+                }
+            });
+
+            // --- Função para Limpar o Formulário ---
+            function clearForm() {
+                studentNameInput.value = '';
+                studentBeltInput.value = '';
+                trainingDateInput.value = '';
+                classTimeSelect.selectedIndex = 0;
+                resetPhotoDisplay();
+                selectedBeltColor = '';
+                selectedBeltDegree = '';
+                beltColorSelector.querySelectorAll('.belt-color-square.selected').forEach(sq => sq.classList.remove('selected'));
+                beltDegreeSelector.querySelectorAll('.belt-degree-square.selected').forEach(sq => sq.classList.remove('selected'));
+                updateStudentBeltInput();
+            }
+
+            // --- Função para Gerar o Relatório Mensal ---
+            function generateMonthlyReport() {
+                 // Limpa o conteúdo anterior do div do relatório
+                 while (monthlyReportDiv.firstChild) {
+                    monthlyReportDiv.removeChild(monthlyReportDiv.firstChild);
+                 }
+
+                const reportList = document.createElement('ul');
+                let trainingCount = 0;
+                const now = new Date(); const currentMonth = now.getMonth(); const currentYear = now.getFullYear();
+                const keysToRemoveOnError = [];
+                const reportItems = [];
+
+                // Coleta e valida itens do localStorage
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('training_')) {
+                        try {
+                            const data = JSON.parse(localStorage.getItem(key));
+                            let itemDate;
+                            const timestamp = parseInt(key.substring('training_'.length));
+                            if (!isNaN(timestamp)) { itemDate = new Date(timestamp); }
+                            else if (data.date) { itemDate = new Date(data.date + 'T00:00:00'); }
+
+                            if (itemDate && !isNaN(itemDate.getTime())) {
+                                reportItems.push({ key: key, data: data, date: itemDate });
+                            } else { console.warn(`Item com chave ${key} tem data inválida.`); keysToRemoveOnError.push(key); }
+                        } catch (e) { console.error(`Erro ao processar chave ${key}:`, e); keysToRemoveOnError.push(key); }
+                    }
+                }
+                reportItems.sort((a, b) => b.date - a.date); // Ordena mais recente primeiro
+
+                // Cria HTML dos itens do mês atual
+                reportItems.forEach(item => {
+                    const { key, data, date: itemDate } = item;
+                    if (itemDate.getFullYear() === currentYear && itemDate.getMonth() === currentMonth) {
+                        const listItem = document.createElement('li');
+                        const deleteButton = document.createElement('button');
+                        deleteButton.type = 'button'; deleteButton.className = 'delete-record-button';
+                        deleteButton.title = 'Apagar este registro'; deleteButton.setAttribute('aria-label', 'Apagar este registro');
+                        deleteButton.dataset.key = key;
+                        deleteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" /></svg>`;
+
+                        const contentDiv = document.createElement('div');
+                        contentDiv.className = 'report-item-content';
+                        let photoElement = '';
+                        if (data.photo) { photoElement = `<img src="${data.photo}" alt="Foto ${data.name || ''}" class="report-photo">`; }
+                        else { photoElement = `<span class="no-photo-placeholder">Sem Foto</span>`; }
+
+                        const formattedDate = itemDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                        let displayBelt = data.belt || 'N/I';
+
+                        const textElement = `<span><strong>${data.name || 'N/I'}</strong><br>${displayBelt} - ${formattedDate} - ${data.time || 'N/I'}</span>`;
+                        contentDiv.innerHTML = photoElement + textElement;
+
+                        listItem.appendChild(contentDiv);
+                        listItem.appendChild(deleteButton);
+                        reportList.appendChild(listItem);
+                        trainingCount++;
+                    }
+                });
+
+                // keysToRemoveOnError.forEach(key => localStorage.removeItem(key));
+
+                // Adiciona lista ou mensagem ao DOM
+                if (trainingCount > 0) {
+                    monthlyReportDiv.appendChild(reportList);
+                } else {
+                    const noTrainingsMessage = document.createElement('p');
+                    noTrainingsMessage.textContent = 'Nenhum treino registrado neste mês.';
+                    monthlyReportDiv.appendChild(noTrainingsMessage);
+                }
+            }
+
+            // --- Lógica de Exclusão Individual ---
+            monthlyReportDiv.addEventListener('click', function(event) {
+                const deleteButton = event.target.closest('.delete-record-button');
+                if (deleteButton) {
+                    const keyToDelete = deleteButton.dataset.key;
+                    if (keyToDelete) {
+                         let studentName = 'este registro';
+                         try { const data = JSON.parse(localStorage.getItem(keyToDelete)); if (data && data.name) studentName = `o registro de ${data.name}`; } catch (e) {}
+                        if (confirm(`Tem certeza que deseja apagar ${studentName}?`)) {
+                            localStorage.removeItem(keyToDelete);
+                            generateMonthlyReport(); // Regenera após apagar
+                        }
+                    }
+                }
+            });
+
+            // --- Gera o Relatório Inicial ao Carregar a Página ---
+            generateMonthlyReport();
+
+        }); // Fim do DOMContentLoaded
+    </script>
+</body>
+</html>
